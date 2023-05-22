@@ -13,5 +13,7 @@ UCLASS()
 class HANDSML_API UHandsMLFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+public:
+	UFUNCTION(BlueprintCallable)
+		static bool SavePoseToFile(class UOculusHandComponent* InHand, const FString& FileName);
 };

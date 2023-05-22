@@ -2,4 +2,10 @@
 
 
 #include "HandsMLFunctionLibrary.h"
+#include "OculusHandComponent.h"
+#include "OculusFunctionLibrary.h"
 
+bool UHandsMLFunctionLibrary::SavePoseToFile(UOculusHandComponent* InHand, const FString& FileName)
+{
+	return false;
+}
