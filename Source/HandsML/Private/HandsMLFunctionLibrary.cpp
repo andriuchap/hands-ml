@@ -36,10 +36,12 @@ bool UHandsMLFunctionLibrary::SavePoseToFile(UOculusHandComponent* InHand, const
 
 	FString FilePath;
 
-	if (FileName.IsEmpty()) {
+	if (FileName.IsEmpty())
+	{
 		FilePath = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("hands_ml_dataset"), FString::Printf(TEXT("%lld.json"), FDateTime::UtcNow().GetTicks()));
 	}
-	else {
+	else
+	{
 		FilePath = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("hands_ml_dataset"), FString::Printf(TEXT("%s.json"), *FileName));
 	}
 
