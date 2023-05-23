@@ -7,7 +7,7 @@
 #include "Misc/Paths.h"
 #include "Misc/FileHelper.h"
 
-bool UHandsMLFunctionLibrary::SavePoseToFile(UOculusHandComponent* InHand, const FString& InLabel, const FString& FileName)
+bool UHandsMLFunctionLibrary::SavePoseToFile(UOculusHandComponent* InHand, const FString& InLabel, const FString& FileName=TEXT(""))
 {
 	//FString ResultString = "{\"class\":\"" + InLabel + "\",\"hand\":\"" + ((InHand->MeshType == EOculusHandType::HandLeft) ? "left" : "right") + "\",\"pose\":[{";
 	FString ResultString = FString::Printf(TEXT("{\"class\":\"%s\",\"hand\":\"%s\",\"pose\":["), *InLabel, ((InHand->MeshType == EOculusHandType::HandLeft) ? TEXT("left") : TEXT("right")));
@@ -34,7 +34,14 @@ bool UHandsMLFunctionLibrary::SavePoseToFile(UOculusHandComponent* InHand, const
 	}
 	ResultString.Append(TEXT("]}"));
 
-	FString FilePath = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("hands_ml_dataset"), FString::Printf(TEXT("%lld.json"), FDateTime::UtcNow().GetTicks()));
+	FString FilePath;
+
+	if (FileName.IsEmpty()) {
+		FilePath = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("hands_ml_dataset"), FString::Printf(TEXT("%lld.json"), FDateTime::UtcNow().GetTicks()));
+	}
+	else {
+		FilePath = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("hands_ml_dataset"), FString::Printf(TEXT("%s.json"), *FileName));
+	}
 
 	return FFileHelper::SaveStringToFile(ResultString, *FilePath);
 }
