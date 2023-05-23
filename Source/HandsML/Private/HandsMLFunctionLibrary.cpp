@@ -43,6 +43,8 @@ bool UHandsMLFunctionLibrary::SavePoseToFile(UOculusHandComponent* InHand, const
 		FilePath = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("hands_ml_dataset"), FString::Printf(TEXT("%s.json"), *FileName));
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Saving result to %s"), *FilePath);
+
 	return FFileHelper::SaveStringToFile(ResultString, *FilePath);
 }
 
