@@ -33,7 +33,7 @@ FCapturedPose UHandsMLFunctionLibrary::CapturePose(UOculusHandComponent* InHand,
 				)
 		);
 	}
-
+	Result.BoneTransformation = BoneTransformation;
 	return Result;
 }
 
@@ -68,7 +68,7 @@ FString UHandsMLFunctionLibrary::GetPoseJson(const FCapturedPose& InPose)
 
 		FBoneTransformationData TransformationData = InPose.BoneTransformation[i];
 
-		ResultString.Append(FString::Printf(TEXT("{\"bone\":\"%s\",\"world\":{%s},\"comp\":{%s}}"),
+		ResultString.Append(FString::Printf(TEXT("{\"bone\":\"%s\",\"world\":%s,\"comp\":%s}"),
 			*BoneNameStr,
 			*LocationAndRotationToPoseString(TransformationData.WorldLocation, TransformationData.WorldRotation),
 			*LocationAndRotationToPoseString(TransformationData.LocalLocation, TransformationData.LocalRotation)));
