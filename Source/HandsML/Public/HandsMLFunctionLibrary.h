@@ -12,29 +12,21 @@ USTRUCT(BlueprintType)
 struct FBoneTransformationData {
 	GENERATED_BODY()
 public:
-	FVector WorldLocation;
-	FRotator WorldRotation;
-	FVector LocalLocation;
-	FRotator LocalRotation;
+	FVector Location;
+	FRotator Rotation;
 
 	FBoneTransformationData()
 	{
-		WorldLocation = FVector::ZeroVector;
-		WorldRotation = FRotator::ZeroRotator;
-		LocalLocation = FVector::ZeroVector;
-		LocalRotation = FRotator::ZeroRotator;
+		Location = FVector::ZeroVector;
+		Rotation = FRotator::ZeroRotator;
 	}
 
 	FBoneTransformationData(
-		const FVector& InWorldLocation,
-		const FRotator& InWorldRotation,
-		const FVector& InLocalLocation,
-		const FRotator& InLocalRotation)
+		const FVector& InLocation,
+		const FRotator& InRotation)
 	{
-		WorldLocation = InWorldLocation;
-		WorldRotation = InWorldRotation;
-		LocalLocation = InLocalLocation;
-		LocalRotation = InLocalRotation;
+		Location = InLocation;
+		Rotation = InRotation;
 	}
 };
 
@@ -42,16 +34,19 @@ USTRUCT(BlueprintType)
 struct FCapturedPose {
 	GENERATED_BODY()
 public:
-	TArray<FBoneTransformationData> BoneTransformation;
+	TArray<FBoneTransformationData> WorldBoneTransformation;
+	TArray<FBoneTransformationData> LocalBoneTransformation;
 	FString ClassLabel;
 	EOculusHandType HandType;
 
 	FCapturedPose();
 
-	FCapturedPose(const TArray<FBoneTransformationData> InBoneTransformation,
+	FCapturedPose(const TArray<FBoneTransformationData> &InWorldBoneTransformation,
+		const TArray<FBoneTransformationData> &InLocalBoneTransformation,
 		const FString& InClassLabel,
 		EOculusHandType InType) {
-		BoneTransformation = InBoneTransformation;
+		WorldBoneTransformation = InWorldBoneTransformation;
+		LocalBoneTransformation = InLocalBoneTransformation;
 		ClassLabel = InClassLabel;
 		HandType = InType;
 	}
@@ -72,6 +67,9 @@ public:
 
 	UFUNCTION(BlueprintPure)
 		static FString GetPoseJson(const FCapturedPose& InPose);
+
+	UFUNCTION(BlueprintPure)
+		static FString GetHandPoseJson(UOculusHandComponent* InHand);
 
 	UFUNCTION(BlueprintCallable)
 		static void SendPoseThroughSnapshotSender(const FCapturedPose& InPose, class ASnapshotSenderInfo* InSender);

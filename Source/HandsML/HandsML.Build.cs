@@ -8,7 +8,7 @@ public class HandsML : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "OculusInput", "OculusHMD", "HTTP" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "OculusInput", "OculusHMD", "HTTP", "Sockets", "Networking" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

@@ -13,7 +13,8 @@ FCapturedPose UHandsMLFunctionLibrary::CapturePose(UOculusHandComponent* InHand,
 	FCapturedPose Result;
 	Result.ClassLabel = InLabel;
 	Result.HandType = InHand->MeshType;
-	TArray<FBoneTransformationData> BoneTransformation;
+	TArray<FBoneTransformationData> WorldBoneTransformation;
+	TArray<FBoneTransformationData> LocalBoneTransformation;
 	for (int i = 0; i < (int)EBone::Bone_Max; i++)
 	{
 		FString BoneNameStr = UOculusInputFunctionLibrary::GetBoneName((EBone)i);
@@ -24,16 +25,21 @@ FCapturedPose UHandsMLFunctionLibrary::CapturePose(UOculusHandComponent* InHand,
 		FVector BoneLocationComp = InHand->GetBoneLocationByName(BoneName, EBoneSpaces::ComponentSpace);
 		FRotator BoneRotationComp = InHand->GetBoneRotationByName(BoneName, EBoneSpaces::ComponentSpace);
 
-		BoneTransformation.Add(
+		WorldBoneTransformation.Add(
 			FBoneTransformationData(
 				BoneLocationWorld,
-				BoneRotationWorld,
-				BoneLocationComp,
-				BoneRotationComp
+				BoneRotationWorld
 				)
 		);
+		WorldBoneTransformation.Add(
+			FBoneTransformationData(
+				BoneLocationComp,
+				BoneRotationComp
+			)
+		);
 	}
-	Result.BoneTransformation = BoneTransformation;
+	Result.WorldBoneTransformation = WorldBoneTransformation;
+	Result.LocalBoneTransformation = LocalBoneTransformation;
 	return Result;
 }
 
@@ -61,24 +67,48 @@ FString UHandsMLFunctionLibrary::GetPoseJson(const FCapturedPose& InPose)
 {
 	FString ResultString = FString::Printf(TEXT("{\"class\":\"%s\",\"hand\":\"%s\",\"pose\":["), *InPose.ClassLabel, ((InPose.HandType == EOculusHandType::HandLeft) ? TEXT("left") : TEXT("right")));
 
-	for (int i = 0; i < InPose.BoneTransformation.Num(); i++)
+	int Num = InPose.WorldBoneTransformation.Num();
+
+	for (int i = 0; i < Num; i++)
 	{
 		FString BoneNameStr = UOculusInputFunctionLibrary::GetBoneName((EBone)i);
 		FName BoneName = FName(BoneNameStr);
 
-		FBoneTransformationData TransformationData = InPose.BoneTransformation[i];
+		FBoneTransformationData WorldTransformationData = InPose.WorldBoneTransformation[i];
+		FBoneTransformationData LocalTransformationData = InPose.WorldBoneTransformation[i];
 
 		ResultString.Append(FString::Printf(TEXT("{\"bone\":\"%s\",\"world\":%s,\"comp\":%s}"),
 			*BoneNameStr,
-			*LocationAndRotationToPoseString(TransformationData.WorldLocation, TransformationData.WorldRotation),
-			*LocationAndRotationToPoseString(TransformationData.LocalLocation, TransformationData.LocalRotation)));
-		if (i + 1 < InPose.BoneTransformation.Num())
+			*LocationAndRotationToPoseString(WorldTransformationData.Location, WorldTransformationData.Rotation),
+			*LocationAndRotationToPoseString(LocalTransformationData.Location, LocalTransformationData.Rotation)));
+		if (i + 1 < Num)
 		{
 			ResultString.Append(",");
 		}
 	}
 	ResultString.Append(TEXT("]}"));
 	return ResultString;
+}
+
+FString UHandsMLFunctionLibrary::GetHandPoseJson(UOculusHandComponent* InHand)
+{
+	FString Result = "{\"rotations\":[";
+	for (int i = 0; i < (int)EBone::Bone_Max; i++)
+	{
+		FString BoneNameStr = UOculusInputFunctionLibrary::GetBoneName((EBone)i);
+		FName BoneName = FName(BoneNameStr);
+
+		FRotator BoneRotation = InHand->GetBoneRotationByName(BoneName, EBoneSpaces::ComponentSpace);
+
+		Result.Append(FString::Printf(TEXT("{\"roll\":%f,\"pitch\":%f,\"yaw\":%f}"), BoneRotation.Roll, BoneRotation.Pitch, BoneRotation.Yaw));
+		if (i < (int)EBone::Pinky_Tip)
+		{
+			Result.Append(",");
+		}
+	}
+
+	Result.Append("]}");
+	return Result;
 }
 
 void UHandsMLFunctionLibrary::SendPoseThroughSnapshotSender(const FCapturedPose& InPose, ASnapshotSenderInfo* InSender)
@@ -98,7 +128,8 @@ FString UHandsMLFunctionLibrary::LocationAndRotationToPoseString(const FVector& 
 
 FCapturedPose::FCapturedPose()
 {
-	BoneTransformation = TArray<FBoneTransformationData>();
+	WorldBoneTransformation = TArray<FBoneTransformationData>();
+	LocalBoneTransformation = TArray<FBoneTransformationData>();
 	ClassLabel = TEXT("");
 	HandType = EOculusHandType::None;
 }
