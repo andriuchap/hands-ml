@@ -48,12 +48,12 @@ void UHandPoseSender::BeginPlay()
 	if (!TargetAddress.Get().IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Target Address is invalid."));
+		return;
 	}
 	
 	UE_LOG(LogTemp, Warning, TEXT("Used Address %s:%d"), *IpAddress, Port);
 
 	UdpSocket->Connect(TargetAddress.Get());
-	
 }
 
 void UHandPoseSender::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -68,23 +68,16 @@ void UHandPoseSender::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UHandPoseSender::SendPoseJSON(const FString& InPoseJSON)
 {
-	if (UdpSocket)
+	if (UdpSocket && UdpSocket->GetConnectionState() == SCS_Connected)
 	{
-		int32 Sent = 0;
-		TArray<uint8> Buffer;
-		//FMemoryWriter ArW(Buffer);
-		Buffer.SetNum(InPoseJSON.Len());
-
-		//FImageUtils::ExportRenderTarget2DAsPNG(InRT, ArW);
 		if (InPoseJSON.Len() != 0)
 		{
-			StringToBytes(InPoseJSON, Buffer.GetData(), InPoseJSON.Len());
+			int32 Sent = 0;
+			
+			FTCHARToUTF8 Str(*InPoseJSON);
+			int32 StrSize = Str.Length();
 
-			//ArW.Serialize((void*)(*InPoseJSON), );
-
-			UE_LOG(LogTemp, Warning, TEXT("%d"), Buffer.Num());
-
-			UdpSocket->Send(Buffer.GetData(), Buffer.Num(), Sent);
+			UdpSocket->Send((uint8*)(TCHAR_TO_UTF8(*InPoseJSON)), StrSize, Sent);
 		}
 	}
 }
@@ -94,7 +87,7 @@ void UHandPoseSender::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (UdpSocket == nullptr)
+	if (UdpSocket == nullptr || UdpSocket->GetConnectionState() != SCS_Connected)
 	{
 		return;
 	}
@@ -120,13 +113,13 @@ void UHandPoseSender::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 				++Buffer;
 				Num--;
 			}
-			/*FString Class, Accuracy;
+			FString Class, Accuracy;
 
 			Result.Split(TEXT(";"), &Class, &Accuracy);
 
 			OnPredictionResult.Broadcast(Class, Accuracy);
 
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *Result);*/
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *Result);
 		}
 	}
 }
