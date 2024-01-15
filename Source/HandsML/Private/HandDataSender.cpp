@@ -11,7 +11,7 @@
 UHandDataSender::UHandDataSender(const FObjectInitializer& ObjInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	IpAddress = "127.0.0.1";
+	IpAddress = "192.168.1.101";
 	Port = 5005;
 	UdpSocket = nullptr;
 }
@@ -107,6 +107,7 @@ void UHandDataSender::SendHandData(const FCapturedPose& InPose)
 	if (UdpSocket)
 	{
 		FString Result = UHandsMLFunctionLibrary::GetPoseJson(InPose);
+		//FString Result = "This is a message from a different computer in the network";
 		TCHAR* Chars = Result.GetCharArray().GetData();
 		int32 Size = FCString::Strlen(Chars);
 
