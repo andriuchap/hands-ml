@@ -37,7 +37,7 @@ void UHandDataSender::BeginPlay()
 	UdpSocket = FTcpSocketBuilder(TEXT("TCP Socket"))
 		.AsReusable()
 		.AsNonBlocking()
-		.WithSendBufferSize(64 * 64)
+		.WithSendBufferSize(8*1024)
 		.Build();
 
 	//FPlatformProcess::CreateProc(*FPaths::Combine(FPaths::ProjectDir(), "rcv.py"), nullptr, true, false, false, nullptr, 0, nullptr, nullptr);
@@ -70,13 +70,16 @@ void UHandDataSender::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	}
 
 	uint32 PendingDataSize = 0;
+	FString State = "A";
 	if (UdpSocket->HasPendingData(PendingDataSize))
 	{
+		State = "B";
 		TArray<uint8> ReceivedBuffer;
 		ReceivedBuffer.SetNum(PendingDataSize);
 		int32 BytesRead = 0;
 		if (UdpSocket->Recv(ReceivedBuffer.GetData(), ReceivedBuffer.Num(), BytesRead))
 		{
+			State = "C";
 			UE_LOG(LogTemp, Warning, TEXT("Message of length %d received"), BytesRead);
 			//FString String = BytesToString(ReceivedBuffer.GetData(), ReceivedBuffer.Num());
 
@@ -100,6 +103,7 @@ void UHandDataSender::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 			UE_LOG(LogTemp, Warning, TEXT("%s"), *Result);
 		}
 	}
+	OnTest.Broadcast(State);
 }
 
 void UHandDataSender::SendHandData(const FCapturedPose& InPose)

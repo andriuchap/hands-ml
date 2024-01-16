@@ -8,6 +8,7 @@
 #include "HandDataSender.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FPredictionResultDelegate, FString, Class, FString, Accuracy);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTestDelegate, FString, String);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class HANDSML_API UHandDataSender : public UActorComponent
@@ -45,4 +46,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FPredictionResultDelegate OnPredictionResult;
+
+	UPROPERTY(BlueprintAssignable)
+	FTestDelegate OnTest;
 };
