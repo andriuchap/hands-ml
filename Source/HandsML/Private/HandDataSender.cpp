@@ -97,8 +97,10 @@ void UHandDataSender::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 			FString Class, Accuracy;
 
 			Result.Split(TEXT(";"), &Class, &Accuracy);
-
-			OnPredictionResult.Broadcast(Class, Accuracy);
+			if (FCString::Atof(*Accuracy) > 0.9)
+			{
+				OnPredictionResult.Broadcast(Class, Accuracy);
+			}
 
 			UE_LOG(LogTemp, Warning, TEXT("%s"), *Result);
 		}
